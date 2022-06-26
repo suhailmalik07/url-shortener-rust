@@ -1,8 +1,17 @@
 [package]
+edition = "2021"
 name = "url-shortener-rust"
 version = "0.1.0"
-edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
+[workspace]
+members = [".", "entity", "migration"]
+
 [dependencies]
+actix-web = "4"
+sea-orm = {version = "0.8.0", features = ["runtime-actix-native-tls", "sqlx-sqlite", "macros"]}
+serde_json = "1"
+dotenv = "0.15.0"
+entity = {path = "entity"}
+migration = {path = "migration"}
