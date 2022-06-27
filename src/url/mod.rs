@@ -12,8 +12,20 @@ pub fn configure(cfg: &mut web::ServiceConfig) {
     cfg.service(
         web::scope("/urls")
             .service(self::create_short_url)
-            .service(self::get_short_url),
+            .service(self::get_short_url)
+            .service(redirect),
     );
+}
+
+#[get("/{url}")]
+async fn redirect(state: web::Data<AppState>, path: web::Path<String>) -> HttpResponse {
+    let short_url = path.into_inner();
+
+    let full_url = url_service::get_full_url_from_short_url(state, short_url).await;
+
+    HttpResponse::PermanentRedirect()
+        .append_header(("LOCATION", full_url))
+        .body(())
 }
 
 #[post("/")]
@@ -27,7 +39,7 @@ async fn create_short_url(state: web::Data<AppState>, req_dto: web::Json<CreateU
 
 #[get("/")]
 async fn get_short_url(state: web::Data<AppState>) -> HttpResponse {
-    let response: GetUrlReqDto = url_service::get_short_url(state).await;
+    let response: GetUrlReqDto = url_service::list_all_short_urls(state).await;
 
     HttpResponse::Ok().json(response)
 }
