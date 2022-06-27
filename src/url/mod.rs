@@ -1,32 +1,33 @@
-pub mod url_controller {
-    use actix_web::{web, Scope};
+mod service;
+use service as url_service;
 
-    use super::url_service;
+mod dto;
+use dto::{CreateUrlDto, GetUrlReqDto};
 
-    pub fn scope() -> Scope {
-        web::scope("/urls").service(url_service::get_short_url)
-    }
+use actix_web::{get, post, web, HttpResponse};
+
+use url_shortener_rust::AppState;
+
+pub fn configure(cfg: &mut web::ServiceConfig) {
+    cfg.service(
+        web::scope("/urls")
+            .service(self::create_short_url)
+            .service(self::get_short_url),
+    );
 }
 
-pub mod url_service {
-    use actix_web::{post, web};
-    use entity::url;
-    use sea_orm::{ActiveModelTrait, Set};
-    use url_shortener_rust::AppState;
+#[post("/")]
+async fn create_short_url(state: web::Data<AppState>, req_dto: web::Json<CreateUrlDto>) -> String {
+    let req_dto: CreateUrlDto = req_dto.into_inner();
 
-    #[post("/")]
-    async fn get_short_url(state: web::Data<AppState>) -> String {
-        println!("Creating something new.");
+    url_service::create_short_url(state, req_dto).await;
 
-        url::ActiveModel {
-            short_key: Set("abc".to_owned()),
-            url: Set("https://www.google.com".to_owned()),
-            ..Default::default()
-        }
-        .save(&state.conn)
-        .await
-        .expect("Counldn't add it");
+    "Success".to_owned()
+}
 
-        "figma".to_owned()
-    }
+#[get("/")]
+async fn get_short_url(state: web::Data<AppState>) -> HttpResponse {
+    let response: GetUrlReqDto = url_service::get_short_url(state).await;
+
+    HttpResponse::Ok().json(response)
 }

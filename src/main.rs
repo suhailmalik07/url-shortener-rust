@@ -1,11 +1,11 @@
-use actix_web::{self, middleware::Logger, App, HttpServer};
+use actix_web::{self, middleware::Logger, web, App, HttpServer};
 use dotenv;
 use sea_orm::{ConnectOptions, Database};
 use std::{env, time::Duration};
 use url_shortener_rust::AppState;
 
 mod url;
-use url::url_controller;
+use url as url_controller;
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
@@ -25,13 +25,20 @@ async fn main() -> std::io::Result<()> {
 
     let state = AppState { conn };
 
+    const PORT: u16 = 8080;
+
     HttpServer::new(move || {
         App::new()
             .wrap(Logger::default())
-            .app_data(state.clone())
-            .service(url_controller::scope())
+            .wrap(Logger::new("Request Pre"))
+            .app_data(web::Data::new(state.clone()))
+            .configure(url_controller::configure)
     })
-    .bind(("127.0.0.1", 8080))?
+    .bind(("127.0.0.1", PORT))?
     .run()
     .await
+    .and_then(|_| {
+        println!("Server is up and running at port {}", PORT);
+        Ok(())
+    })
 }
