@@ -18,10 +18,10 @@ pub fn configure(cfg: &mut web::ServiceConfig) {
 }
 
 #[get("/{url}")]
-async fn redirect(state: web::Data<AppState>, path: web::Path<String>) -> HttpResponse {
-    let short_url = path.into_inner();
+async fn redirect(state: web::Data<AppState>, short_key: web::Path<String>) -> HttpResponse {
+    let short_key = short_key.into_inner();
 
-    let full_url = url_service::get_full_url_from_short_url(state, short_url).await;
+    let full_url = url_service::get_full_url_from_short_key(state, short_key).await;
 
     HttpResponse::PermanentRedirect()
         .append_header(("LOCATION", full_url))

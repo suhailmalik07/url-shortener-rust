@@ -10,9 +10,10 @@ members = [".", "entity", "migration"]
 
 [dependencies]
 actix-web = "4"
-sea-orm = {version = "0.8.0", features = ["runtime-actix-native-tls", "sqlx-sqlite", "macros"]}
+sea-orm = {version = "0.9", features = ["runtime-actix-native-tls", "sqlx-sqlite", "macros"]}
 serde = "1"
 serde_json = "1"
 dotenv = "0.15.0"
 entity = {path = "entity"}
 migration = {path = "migration"}
+rand = "0.8.5"

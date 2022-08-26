@@ -1,0 +1,9 @@
+# Create New
+POST http://localhost:8080/urls/
+content-type: application/json
+
+{
+    "url": "https://www.google.com"
+}
+
+

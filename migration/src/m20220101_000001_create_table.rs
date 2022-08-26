@@ -24,7 +24,12 @@ impl MigrationTrait for Migration {
                             .primary_key()
                             .auto_increment(),
                     )
-                    .col(ColumnDef::new(Column::ShortKey).string().not_null())
+                    .col(
+                        ColumnDef::new(Column::ShortKey)
+                            .string()
+                            .unique_key()
+                            .not_null(),
+                    )
                     .col(ColumnDef::new(Column::Url).string().not_null())
                     .col(
                         ColumnDef::new(Column::VisitorCount)
@@ -32,6 +37,7 @@ impl MigrationTrait for Migration {
                             .default(0u32)
                             .not_null(),
                     )
+                    .col(ColumnDef::new(Column::DeletedAt).date_time().null())
                     .to_owned(),
             )
             .await

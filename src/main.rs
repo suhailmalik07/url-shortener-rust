@@ -5,7 +5,7 @@ use std::{env, time::Duration};
 use url_shortener_rust::AppState;
 
 mod url;
-use url as url_controller;
+use url as url_module;
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
@@ -15,7 +15,7 @@ async fn main() -> std::io::Result<()> {
 
     let mut opt = ConnectOptions::new(db_url);
     opt.max_connections(10)
-        .min_connections(1)
+        .min_connections(0)
         .connect_timeout(Duration::from_secs(8))
         .idle_timeout(Duration::from_secs(8))
         .max_lifetime(Duration::from_secs(8))
@@ -32,13 +32,9 @@ async fn main() -> std::io::Result<()> {
             .wrap(Logger::default())
             .wrap(Logger::new("Request Pre"))
             .app_data(web::Data::new(state.clone()))
-            .configure(url_controller::configure)
+            .configure(url_module::configure)
     })
     .bind(("127.0.0.1", PORT))?
     .run()
     .await
-    .and_then(|_| {
-        println!("Server is up and running at port {}", PORT);
-        Ok(())
-    })
 }
